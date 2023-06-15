@@ -47,7 +47,12 @@ class AccountPaymentRegister(models.TransientModel):
         active_ids = self.env.context.get("active_ids")
         moves = self.env["account.move"].browse(active_ids)
         move_lines = moves.mapped("line_ids")
-        analytic_account = move_lines.mapped("analytic_account_id")
+        analytic_account = (
+            move_lines.mapped("analytic_account_id")
+            if "analytic_account_id" in move_lines._fields
+            else self.env["account.analytic.account"]
+        )
+
         analytic_tag = move_lines.mapped("analytic_tag_ids")
         taxes_account = (
             self.env["account.tax.repartition.line"]
@@ -71,7 +76,12 @@ class AccountPaymentRegister(models.TransientModel):
 
     def _update_vals_deduction(self, moves):
         move_lines = moves.mapped("line_ids")
-        analytic_account = move_lines.mapped("analytic_account_id")
+        analytic_account = (
+            move_lines.mapped("analytic_account_id")
+            if "analytic_account_id" in move_lines._fields
+            else self.env["account.analytic.account"]
+        )
+
         analytic_tag = move_lines.mapped("analytic_tag_ids")
         taxes_account = (
             self.env["account.tax.repartition.line"]
