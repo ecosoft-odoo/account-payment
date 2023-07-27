@@ -33,8 +33,8 @@ class AccountPaymentDeduction(models.TransientModel):
         store=True,
         index=True,
     )
-    analytic_tag_ids = fields.Many2many(
-        comodel_name="account.analytic.tag",
+    analytic_distribution_ids = fields.Many2many(
+        comodel_name="account.analytic.distribution.model",
         string="Analytic Tags",
     )
 
@@ -42,7 +42,7 @@ class AccountPaymentDeduction(models.TransientModel):
     def _compute_analytic_multi_deduction(self):
         for rec in self:
             rec.analytic_account_id = rec.payment_id.deduct_analytic_account_id
-            rec.analytic_tag_ids = rec.payment_id.deduct_analytic_tag_ids
+            rec.analytic_distribution_ids = rec.payment_id.deduct_analytic_distribution_ids
 
     @api.onchange("open")
     def _onchange_open(self):

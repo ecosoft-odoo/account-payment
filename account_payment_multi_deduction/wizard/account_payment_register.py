@@ -29,16 +29,16 @@ class AccountPaymentRegister(models.TransientModel):
         string="Analytic Account",
         index=True,
     )
-    writeoff_analytic_tag_ids = fields.Many2many(
-        comodel_name="account.analytic.tag",
-        string="Analytic Tags",
+    writeoff_analytic_distribution_ids = fields.Many2many(
+        comodel_name="account.analytic.distribution.model",
+        string="Analytic Distribution",
     )
     deduct_analytic_account_id = fields.Many2one(
         comodel_name="account.analytic.account",
         compute="_compute_default_analytic",
     )
-    deduct_analytic_tag_ids = fields.Many2many(
-        comodel_name="account.analytic.tag",
+    deduct_analytic_distribution_ids = fields.Many2many(
+        comodel_name="account.analytic.distribution.model",
         compute="_compute_default_analytic",
     )
 
@@ -47,13 +47,8 @@ class AccountPaymentRegister(models.TransientModel):
         active_ids = self.env.context.get("active_ids")
         moves = self.env["account.move"].browse(active_ids)
         move_lines = moves.mapped("line_ids")
-        analytic_account = (
-            move_lines.mapped("analytic_account_id")
-            if "analytic_account_id" in move_lines._fields
-            else self.env["account.analytic.account"]
-        )
-
-        analytic_tag = move_lines.mapped("analytic_tag_ids")
+        analytic_account = move_lines.mapped("analytic_account_id")
+        analytic_distribution = move_lines.mapped("analytic_distribution_ids")
         taxes_account = (
             self.env["account.tax.repartition.line"]
             .search([("account_id", "!=", False)])
@@ -64,25 +59,20 @@ class AccountPaymentRegister(models.TransientModel):
             and l.account_id.id not in taxes_account.ids
         )
         default_tag = (
-            all(line.analytic_tag_ids == analytic_tag for line in moves_without_tax)
-            and analytic_tag
+            all(line.analytic_distribution_ids == analytic_distribution for line in moves_without_tax)
+            and analytic_distribution
             or False
         )
         for rec in self:
             rec.deduct_analytic_account_id = (
                 len(analytic_account) == 1 and analytic_account.id or False
             )
-            rec.deduct_analytic_tag_ids = default_tag
+            rec.deduct_analytic_distribution_ids = default_tag
 
     def _update_vals_deduction(self, moves):
         move_lines = moves.mapped("line_ids")
-        analytic_account = (
-            move_lines.mapped("analytic_account_id")
-            if "analytic_account_id" in move_lines._fields
-            else self.env["account.analytic.account"]
-        )
-
-        analytic_tag = move_lines.mapped("analytic_tag_ids")
+        analytic_account = move_lines.mapped("analytic_account_id")
+        analytic_distribution = move_lines.mapped("analytic_distribution_ids")
         taxes_account = (
             self.env["account.tax.repartition.line"]
             .search([("account_id", "!=", False)])
@@ -93,14 +83,14 @@ class AccountPaymentRegister(models.TransientModel):
             and l.account_id.id not in taxes_account.ids
         )
         default_tag = (
-            all(line.analytic_tag_ids == analytic_tag for line in moves_without_tax)
-            and analytic_tag
+            all(line.analytic_distribution_ids == analytic_distribution for line in moves_without_tax)
+            and analytic_distribution
             or False
         )
         self.writeoff_analytic_account_id = (
             len(analytic_account) == 1 and analytic_account.id or False
         )
-        self.writeoff_analytic_tag_ids = default_tag
+        self.writeoff_analytic_distribution_ids = default_tag
 
     @api.onchange("payment_difference", "payment_difference_handling")
     def _onchange_default_deduction(self):
@@ -151,8 +141,8 @@ class AccountPaymentRegister(models.TransientModel):
             payment_vals["write_off_line_vals"][
                 "analytic_account_id"
             ] = self.writeoff_analytic_account_id.id
-            payment_vals["write_off_line_vals"]["analytic_tag_ids"] = [
-                (6, 0, self.writeoff_analytic_tag_ids.ids)
+            payment_vals["write_off_line_vals"]["analytic_distribution_ids"] = [
+                (6, 0, self.writeoff_analytic_distribution_ids.ids)
             ]
         # multi deduction
         elif (
@@ -174,7 +164,7 @@ class AccountPaymentRegister(models.TransientModel):
             "analytic_account_id": deduct.analytic_account_id
             and deduct.analytic_account_id.id
             or False,
-            "analytic_tag_ids": deduct.analytic_tag_ids
-            and [(6, 0, deduct.analytic_tag_ids.ids)]
+            "analytic_distribution_ids": deduct.analytic_distribution_ids
+            and [(6, 0, deduct.analytic_distribution_ids.ids)]
             or False,
         }

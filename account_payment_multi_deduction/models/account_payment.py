@@ -13,7 +13,7 @@ class AccountPayment(models.Model):
         return ["name", "account_id"]
 
     def _get_update_key_list(self):
-        return ["analytic_account_id", "analytic_tag_ids"]
+        return ["analytic_account_id", "analytic_distribution_ids"]
 
     def _update_vals_writeoff(
         self, write_off_line_vals, line_vals_list, check_keys, update_keys

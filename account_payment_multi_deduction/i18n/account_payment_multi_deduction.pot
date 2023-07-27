@@ -25,8 +25,8 @@ msgid "Analytic Account"
 msgstr ""
 
 #. module: account_payment_multi_deduction
-#: model:ir.model.fields,field_description:account_payment_multi_deduction.field_account_payment_deduction__analytic_tag_ids
-#: model:ir.model.fields,field_description:account_payment_multi_deduction.field_account_payment_register__writeoff_analytic_tag_ids
+#: model:ir.model.fields,field_description:account_payment_multi_deduction.field_account_payment_deduction__analytic_distribution_ids
+#: model:ir.model.fields,field_description:account_payment_multi_deduction.field_account_payment_register__writeoff_analytic_distritbution_ids
 msgid "Analytic Tags"
 msgstr ""
 
@@ -51,7 +51,7 @@ msgid "Deduct Analytic Account"
 msgstr ""
 
 #. module: account_payment_multi_deduction
-#: model:ir.model.fields,field_description:account_payment_multi_deduction.field_account_payment_register__deduct_analytic_tag_ids
+#: model:ir.model.fields,field_description:account_payment_multi_deduction.field_account_payment_register__deduct_analytic_distribution_ids
 msgid "Deduct Analytic Tag"
 msgstr ""
 
