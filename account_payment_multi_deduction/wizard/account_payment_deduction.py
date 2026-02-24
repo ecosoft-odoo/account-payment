@@ -8,20 +8,25 @@ class AccountPaymentDeduction(models.TransientModel):
     _name = "account.payment.deduction"
     _inherit = "analytic.mixin"
     _description = "Payment Deduction"
+    _check_company_auto = True
 
-    payment_id = fields.Many2one(
+    register_payment_id = fields.Many2one(
         comodel_name="account.payment.register",
         readonly=True,
+        index=True,
         ondelete="cascade",
+    )
+    company_id = fields.Many2one(
+        comodel_name="res.company", related="register_payment_id.company_id"
     )
     currency_id = fields.Many2one(
         comodel_name="res.currency",
-        related="payment_id.currency_id",
-        readonly=True,
+        related="register_payment_id.currency_id",
     )
     account_id = fields.Many2one(
         comodel_name="account.account",
         domain=[("deprecated", "=", False)],
+        check_company=True,
     )
     is_open = fields.Boolean(string="Open", help="Keep this line open")
     amount = fields.Monetary(string="Deduction Amount", required=True)
